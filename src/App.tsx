@@ -15,6 +15,9 @@ import ProfilePage from "@/components/game/ProfilePage";
 import Leaderboard from "@/components/game/Leaderboard";
 import CodeStandardsGame from "./pages/games/CodeStandardsGame";
 import RiskAdventureGame from "./pages/games/RiskAdventureGame";
+import DebugChallengeGame from "./pages/games/DebugChallengeGame";
+import ReviewMatchupGame from "./pages/games/ReviewMatchupGame";
+import TestingArenaGame from "./pages/games/TestingArenaGame";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +40,9 @@ const App = () => (
             {/* Game-specific routes */}
             <Route path="/game/coding-standards" element={<CodeStandardsGame />} />
             <Route path="/game/risk-adventure" element={<RiskAdventureGame />} />
+            <Route path="/game/debug-mission" element={<DebugChallengeGame />} />
+            <Route path="/game/code-review" element={<ReviewMatchupGame />} />
+            <Route path="/game/testing-arena" element={<TestingArenaGame />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

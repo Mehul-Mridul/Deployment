@@ -97,8 +97,48 @@ export const managementGames: Game[] = [
   }
 ];
 
+// Mini games for quick practice
+export const miniGames: Game[] = [
+  {
+    id: 'code-standards-quiz',
+    title: 'Code Standards Quiz',
+    description: 'Test your knowledge of coding standards with quick questions.',
+    imageUrl: '/placeholder.svg',
+    path: '/game/code-quiz',
+    category: 'construction',
+    type: 'puzzle',
+    difficulty: 'easy',
+    xpReward: 25,
+    timeLimit: 180,
+  },
+  {
+    id: 'quick-debug',
+    title: 'Quick Debug Challenge',
+    description: 'Find bugs in short code snippets against the clock.',
+    imageUrl: '/placeholder.svg',
+    path: '/game/quick-debug',
+    category: 'construction',
+    type: 'debug',
+    difficulty: 'medium',
+    xpReward: 35,
+    timeLimit: 120,
+  },
+  {
+    id: 'risk-identification',
+    title: 'Risk Identification Race',
+    description: 'Quickly identify potential risks in project scenarios.',
+    imageUrl: '/placeholder.svg',
+    path: '/game/risk-race',
+    category: 'management',
+    type: 'risk',
+    difficulty: 'easy',
+    xpReward: 30,
+    timeLimit: 150,
+  }
+];
+
 // All games combined
-export const allGames: Game[] = [...constructionGames, ...managementGames];
+export const allGames: Game[] = [...constructionGames, ...managementGames, ...miniGames];
 
 // Available badges
 export const badges: Badge[] = [
