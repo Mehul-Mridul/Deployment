@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Player, GameProgress, Badge } from '@/types/game';
 import { badges, initialPlayerState } from '@/data/gameData';
+import { useToast } from '@/hooks/use-toast';
 
 interface PlayerContextType {
   player: Player;
@@ -14,6 +15,8 @@ interface PlayerContextType {
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 export const PlayerProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+  const { toast } = useToast();
+  
   // Try to load player data from localStorage
   const [player, setPlayer] = useState<Player>(() => {
     const savedPlayer = localStorage.getItem('playerData');
@@ -45,7 +48,11 @@ export const PlayerProvider: React.FC<{children: React.ReactNode}> = ({ children
     
     if (leveledUp) {
       // Show level up notification
-      console.log(`Leveled up to ${newLevel}!`);
+      toast({
+        title: "Level Up!",
+        description: `Congratulations! You've reached level ${newLevel}!`,
+        variant: "success"
+      });
     }
   };
 
@@ -53,12 +60,24 @@ export const PlayerProvider: React.FC<{children: React.ReactNode}> = ({ children
   const completeGame = (gameId: string, score: number, timeSpent: number) => {
     if (player.completedGames.includes(gameId)) {
       // Game already completed, update progress
+      toast({
+        title: "Game Replayed",
+        description: "You've improved your score!",
+        variant: "default"
+      });
+      
       setPlayer({
         ...player,
         completedGames: [...player.completedGames]
       });
     } else {
       // New game completion
+      toast({
+        title: "Mission Complete!",
+        description: "New mission completed! +25 XP awarded.",
+        variant: "success"
+      });
+      
       setPlayer({
         ...player,
         completedGames: [...player.completedGames, gameId]
@@ -71,18 +90,30 @@ export const PlayerProvider: React.FC<{children: React.ReactNode}> = ({ children
 
   // Unlock a badge
   const unlockBadge = (badgeId: string) => {
-    const updatedBadges = player.badges.map(badge => 
-      badge.id === badgeId ? { ...badge, unlocked: true } : badge
+    const badgeAlreadyUnlocked = player.badges.some(
+      badge => badge.id === badgeId && badge.unlocked
     );
     
-    setPlayer({
-      ...player,
-      badges: updatedBadges
-    });
+    if (!badgeAlreadyUnlocked) {
+      const updatedBadges = player.badges.map(badge => 
+        badge.id === badgeId ? { ...badge, unlocked: true } : badge
+      );
+      
+      setPlayer({
+        ...player,
+        badges: updatedBadges
+      });
+    }
   };
 
   // Reset all progress
   const resetProgress = () => {
+    toast({
+      title: "Progress Reset",
+      description: "All progress has been reset.",
+      variant: "destructive"
+    });
+    
     setPlayer(initialPlayerState);
     localStorage.removeItem('playerData');
   };

@@ -1,6 +1,8 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { usePlayer } from '@/context/PlayerContext';
+import { Trophy, Medal, Award, Star, Shield, User } from 'lucide-react';
 
 interface LeaderboardEntry {
   rank: number;
@@ -9,20 +11,60 @@ interface LeaderboardEntry {
   score: number;
   completedGames: number;
   badges: number;
+  isCurrentUser?: boolean;
 }
 
 const Leaderboard: React.FC = () => {
-  // Mock leaderboard data (would normally come from API/database)
-  const leaderboardEntries: LeaderboardEntry[] = [
-    { rank: 1, name: "CyberNinja", level: 8, score: 4250, completedGames: 7, badges: 5 },
-    { rank: 2, name: "CodeMaster", level: 7, score: 3800, completedGames: 6, badges: 4 },
-    { rank: 3, name: "RiskHunter", level: 6, score: 3450, completedGames: 5, badges: 4 },
-    { rank: 4, name: "DebugWhiz", level: 5, score: 3100, completedGames: 6, badges: 3 },
-    { rank: 5, name: "TestGuru", level: 5, score: 2950, completedGames: 5, badges: 3 },
-    { rank: 6, name: "ReviewPro", level: 4, score: 2700, completedGames: 4, badges: 2 },
-    { rank: 7, name: "BugCrusher", level: 4, score: 2500, completedGames: 4, badges: 2 },
-    { rank: 8, name: "Agent", level: 1, score: 0, completedGames: 0, badges: 0 },
-  ];
+  const { player } = usePlayer();
+  const [leaderboardEntries, setLeaderboardEntries] = useState<LeaderboardEntry[]>([]);
+  
+  // Generate leaderboard data when component mounts
+  useEffect(() => {
+    // Mock leaderboard data with some fixed entries
+    const mockEntries: LeaderboardEntry[] = [
+      { rank: 1, name: "CyberNinja", level: 8, score: 4250, completedGames: 7, badges: 5 },
+      { rank: 2, name: "CodeMaster", level: 7, score: 3800, completedGames: 6, badges: 4 },
+      { rank: 3, name: "RiskHunter", level: 6, score: 3450, completedGames: 5, badges: 4 },
+      { rank: 4, name: "DebugWhiz", level: 5, score: 3100, completedGames: 6, badges: 3 },
+      { rank: 5, name: "TestGuru", level: 5, score: 2950, completedGames: 5, badges: 3 },
+      { rank: 6, name: "ReviewPro", level: 4, score: 2700, completedGames: 4, badges: 2 },
+      { rank: 7, name: "BugCrusher", level: 4, score: 2500, completedGames: 4, badges: 2 },
+    ];
+    
+    // Add the current player
+    const currentPlayer: LeaderboardEntry = {
+      rank: 0, // Will be adjusted below
+      name: player.name,
+      level: player.level,
+      score: player.xp * 10, // Convert XP to score for display
+      completedGames: player.completedGames.length,
+      badges: player.badges.filter(b => b.unlocked).length,
+      isCurrentUser: true
+    };
+    
+    // Insert player into leaderboard based on score
+    let inserted = false;
+    for (let i = 0; i < mockEntries.length; i++) {
+      if (currentPlayer.score > mockEntries[i].score) {
+        mockEntries.splice(i, 0, currentPlayer);
+        inserted = true;
+        break;
+      }
+    }
+    
+    // If player score is lower than all entries, add at the end
+    if (!inserted) {
+      mockEntries.push(currentPlayer);
+    }
+    
+    // Rerank the leaderboard
+    const rankedEntries = mockEntries.map((entry, index) => ({
+      ...entry,
+      rank: index + 1
+    }));
+    
+    setLeaderboardEntries(rankedEntries);
+  }, [player]);
 
   return (
     <div className="min-h-screen bg-cyber-background p-6">
@@ -59,7 +101,7 @@ const Leaderboard: React.FC = () => {
                   <tr 
                     key={entry.rank}
                     className={`border-b border-cyber-border ${
-                      entry.name === 'Agent' ? 'bg-cyber-primary bg-opacity-10' : ''
+                      entry.isCurrentUser ? 'bg-cyber-primary bg-opacity-10' : ''
                     }`}
                   >
                     <td className="py-4 px-4">
@@ -75,7 +117,7 @@ const Leaderboard: React.FC = () => {
                     </td>
                     <td className="py-4 px-4 font-semibold">
                       {entry.name}
-                      {entry.name === 'Agent' && 
+                      {entry.isCurrentUser && 
                         <span className="ml-2 text-xs text-cyber-primary">(You)</span>
                       }
                     </td>

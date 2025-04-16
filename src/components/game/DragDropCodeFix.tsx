@@ -19,6 +19,7 @@ const DragDropCodeFix: React.FC<DragDropCodeFixProps> = ({
   const [selectedFix, setSelectedFix] = useState<number | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [feedbackType, setFeedbackType] = useState<'success' | 'error' | ''>('');
+  const [isCorrect, setIsCorrect] = useState(false);
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -30,19 +31,23 @@ const DragDropCodeFix: React.FC<DragDropCodeFixProps> = ({
       if (sourceIndex === correctFixIndex) {
         setFeedbackMessage('Correct! This fix follows proper coding standards.');
         setFeedbackType('success');
+        setIsCorrect(true);
         onCorrectFix();
       } else {
         setFeedbackMessage('Incorrect. This solution violates coding standards.');
         setFeedbackType('error');
+        setIsCorrect(false);
         onIncorrectFix();
       }
     }
   };
 
   const resetSelection = () => {
-    setSelectedFix(null);
-    setFeedbackMessage('');
-    setFeedbackType('');
+    if (!isCorrect) {
+      setSelectedFix(null);
+      setFeedbackMessage('');
+      setFeedbackType('');
+    }
   };
 
   return (
@@ -120,12 +125,22 @@ const DragDropCodeFix: React.FC<DragDropCodeFixProps> = ({
                     }`}>
                       {feedbackMessage}
                     </div>
-                    <button 
-                      onClick={resetSelection}
-                      className="cyber-button-accent mt-4 text-sm py-1 px-4"
-                    >
-                      Try Again
-                    </button>
+                    {!isCorrect && (
+                      <button 
+                        onClick={resetSelection}
+                        className="cyber-button-accent mt-4 text-sm py-1 px-4"
+                      >
+                        Try Again
+                      </button>
+                    )}
+                    {isCorrect && (
+                      <button 
+                        className="cyber-button-primary mt-4 text-sm py-1 px-4"
+                        disabled
+                      >
+                        Correct!
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="text-gray-500 text-sm">

@@ -20,6 +20,8 @@ import ReviewMatchupGame from "./pages/games/ReviewMatchupGame";
 import TestingArenaGame from "./pages/games/TestingArenaGame";
 import ProductReleaseGame from "./pages/games/ProductReleaseGame";
 import RMMMPlanGame from "./pages/games/RMMMPlanGame";
+import CodeStandardsQuiz from "./pages/games/CodeStandardsQuiz";
+import QuickDebugGame from "./pages/games/QuickDebugGame";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,8 @@ const App = () => (
             <Route path="/game/testing-arena" element={<TestingArenaGame />} />
             <Route path="/game/product-release" element={<ProductReleaseGame />} />
             <Route path="/game/rmmm-builder" element={<RMMMPlanGame />} />
+            <Route path="/game/code-quiz" element={<CodeStandardsQuiz />} />
+            <Route path="/game/quick-debug" element={<QuickDebugGame />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

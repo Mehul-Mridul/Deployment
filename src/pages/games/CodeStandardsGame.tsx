@@ -1,11 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { usePlayer } from '@/context/PlayerContext';
 import GameHUD from '@/components/game/GameHUD';
 import CodeBlock from '@/components/game/CodeBlock';
 import DragDropCodeFix from '@/components/game/DragDropCodeFix';
 
 const CodeStandardsGame = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { player, updatePlayerXP, completeGame, unlockBadge } = usePlayer();
+  
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
@@ -19,6 +25,8 @@ const CodeStandardsGame = () => {
     type: 'info' as 'success' | 'error' | 'info'
   });
   const [gameCompleted, setGameCompleted] = useState(false);
+  const [levelCompleted, setLevelCompleted] = useState(false);
+  const [showNextLevelButton, setShowNextLevelButton] = useState(false);
 
   // Simulated countdown timer
   useEffect(() => {
@@ -37,26 +45,87 @@ const CodeStandardsGame = () => {
   }, [timeLeft, gameCompleted]);
 
   const handleCorrectFix = () => {
-    const newScore = score + 10;
-    setScore(newScore);
-    setCurrentXp(Math.min(currentXp + 5, 100));
-    
-    if (newScore >= 50) {
-      // Game completed
-      setGameCompleted(true);
-      setModalContent({
-        title: 'Coding Standards Mastered!',
-        message: 'Congratulations! You\'ve successfully completed the Coding Standards Quest with a score of ' + newScore,
-        type: 'success'
+    // Only apply changes if level isn't already completed
+    if (!levelCompleted) {
+      const pointsGained = 10;
+      const newScore = score + pointsGained;
+      setScore(newScore);
+      
+      const xpGained = 5;
+      setCurrentXp(Math.min(currentXp + xpGained, 100));
+      
+      // Show toast notification
+      toast({
+        title: "Correct Solution!",
+        description: `+${pointsGained} points, +${xpGained} XP`,
+        variant: "success"
       });
-      setShowModal(true);
+      
+      // Mark level as completed
+      setLevelCompleted(true);
+      setShowNextLevelButton(true);
+      
+      // Check if game completed (after all 3 levels)
+      if (level >= codeChallenges.length) {
+        handleGameCompleted(newScore);
+      }
     }
+  };
+
+  const handleNextLevel = () => {
+    if (level < codeChallenges.length) {
+      setLevel(level + 1);
+      setLevelCompleted(false);
+      setShowNextLevelButton(false);
+      
+      toast({
+        title: "Level Up!",
+        description: `Starting level ${level + 1}`,
+        variant: "default"
+      });
+    } else {
+      handleGameCompleted(score);
+    }
+  };
+
+  const handleGameCompleted = (finalScore: number) => {
+    setGameCompleted(true);
+    
+    // Award XP to player
+    updatePlayerXP(currentXp);
+    
+    // Mark game as completed
+    completeGame('coding-standards', finalScore, 300 - timeLeft);
+    
+    // Award badge if score is high enough
+    if (finalScore >= 25) {
+      unlockBadge('code-master');
+      
+      toast({
+        title: "Badge Unlocked!",
+        description: "You've earned the Code Master badge!",
+        variant: "success"
+      });
+    }
+    
+    setModalContent({
+      title: 'Coding Standards Mastered!',
+      message: `Congratulations! You've successfully completed the Coding Standards Quest with a score of ${finalScore}`,
+      type: 'success'
+    });
+    setShowModal(true);
   };
 
   const handleIncorrectFix = () => {
     const newLives = lives - 1;
     setLives(newLives);
     setAttempts(attempts + 1);
+    
+    toast({
+      title: "Incorrect Solution",
+      description: `That's not right. ${newLives} lives remaining.`,
+      variant: "destructive"
+    });
     
     if (newLives <= 0) {
       setModalContent({
@@ -72,10 +141,13 @@ const CodeStandardsGame = () => {
     setTimeLeft(300);
     setScore(0);
     setLives(3);
+    setLevel(1);
     setAttempts(0);
     setCurrentXp(0);
     setShowModal(false);
     setGameCompleted(false);
+    setLevelCompleted(false);
+    setShowNextLevelButton(false);
   };
 
   // Code challenge data
@@ -187,6 +259,28 @@ const CodeStandardsGame = () => {
           />
         </div>
         
+        {showNextLevelButton && level < codeChallenges.length && (
+          <div className="flex justify-center mb-8">
+            <button 
+              onClick={handleNextLevel}
+              className="cyber-button-primary py-3 px-6 animate-pulse hover:animate-none"
+            >
+              PROCEED TO LEVEL {level + 1}
+            </button>
+          </div>
+        )}
+        
+        {showNextLevelButton && level >= codeChallenges.length && (
+          <div className="flex justify-center mb-8">
+            <button 
+              onClick={() => handleGameCompleted(score)}
+              className="cyber-button-primary py-3 px-6 animate-pulse hover:animate-none"
+            >
+              COMPLETE MISSION
+            </button>
+          </div>
+        )}
+        
         <div className="cyber-container p-4 border-cyber-border mb-6">
           <div className="flex items-center mb-2">
             <div className="w-4 h-4 rounded-full bg-cyber-terminal-blue mr-2 animate-pulse"></div>
@@ -214,12 +308,22 @@ const CodeStandardsGame = () => {
             </h2>
             <p className="text-gray-300 mb-6">{modalContent.message}</p>
             <div className="flex space-x-4">
-              <button 
-                onClick={restartGame}
-                className="cyber-button-primary flex-1"
-              >
-                Try Again
-              </button>
+              {modalContent.type === 'error' && (
+                <button 
+                  onClick={restartGame}
+                  className="cyber-button-primary flex-1"
+                >
+                  Try Again
+                </button>
+              )}
+              {modalContent.type === 'success' && (
+                <button 
+                  onClick={() => navigate('/campaign')}
+                  className="cyber-button-primary flex-1"
+                >
+                  Return to Campaign
+                </button>
+              )}
               <Link 
                 to="/campaign"
                 className="cyber-button flex-1 text-center"
