@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { constructionGames, managementGames } from '@/data/gameData';
+import { Code, FileWarning, Database, LayoutDashboard, Zap } from 'lucide-react';
 
 const GameModeSelector: React.FC = () => {
   return (
@@ -11,10 +12,14 @@ const GameModeSelector: React.FC = () => {
           SELECT MISSION TYPE
         </h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
           {/* Software Construction Mode */}
-          <div className="cyber-container p-6 border-cyber-primary h-full flex flex-col">
-            <div className="mb-6">
+          <div className="cyber-container p-6 border-cyber-primary h-full flex flex-col relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 -mt-8 -mr-8 opacity-10">
+              <Code size={128} className="text-cyber-primary" />
+            </div>
+            
+            <div className="mb-6 relative z-10">
               <h2 className="text-2xl font-bold text-cyber-terminal-blue cyber-text-glow mb-2">
                 CAMPAIGN MODE
               </h2>
@@ -47,9 +52,16 @@ const GameModeSelector: React.FC = () => {
               </div>
             </div>
             
-            <div className="mt-auto flex flex-col space-y-4">
-              <div className="cyber-badge bg-cyber-muted self-start">
-                <span className="text-cyber-terminal-purple">{constructionGames.length} Missions</span>
+            <div className="mt-auto flex flex-col space-y-4 relative z-10">
+              <div className="flex items-center">
+                <div className="cyber-badge bg-cyber-muted">
+                  <span className="text-cyber-terminal-purple">{constructionGames.length} Missions</span>
+                </div>
+                <div className="cyber-badge bg-cyber-primary/20 ml-2">
+                  <span className="text-cyber-primary flex items-center">
+                    <Zap size={14} className="mr-1" /> RECOMMENDED START
+                  </span>
+                </div>
               </div>
               
               <Link 
@@ -62,8 +74,12 @@ const GameModeSelector: React.FC = () => {
           </div>
           
           {/* Product Management Mode */}
-          <div className="cyber-container p-6 border-cyber-secondary h-full flex flex-col">
-            <div className="mb-6">
+          <div className="cyber-container p-6 border-cyber-secondary h-full flex flex-col relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 -mt-8 -mr-8 opacity-10">
+              <FileWarning size={128} className="text-cyber-secondary" />
+            </div>
+            
+            <div className="mb-6 relative z-10">
               <h2 className="text-2xl font-bold text-cyber-terminal-blue cyber-text-glow mb-2">
                 BOSS BATTLE MODE
               </h2>
@@ -96,7 +112,7 @@ const GameModeSelector: React.FC = () => {
               </div>
             </div>
             
-            <div className="mt-auto flex flex-col space-y-4">
+            <div className="mt-auto flex flex-col space-y-4 relative z-10">
               <div className="cyber-badge bg-cyber-muted self-start">
                 <span className="text-cyber-terminal-yellow">{managementGames.length} Boss Battles</span>
               </div>
@@ -111,13 +127,79 @@ const GameModeSelector: React.FC = () => {
           </div>
         </div>
         
-        <div className="mt-8 flex justify-center">
-          <Link 
-            to="/mini-games"
-            className="cyber-button-accent py-3 px-8"
-          >
-            ACCESS MINI-GAMES
-          </Link>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+          {/* Mini Games Section */}
+          <div className="cyber-container p-6 border-cyber-accent h-full flex flex-col relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 -mt-4 -mr-4 opacity-10">
+              <LayoutDashboard size={80} className="text-cyber-accent" />
+            </div>
+            
+            <div className="mb-6 relative z-10">
+              <h2 className="text-xl font-bold text-cyber-terminal-purple cyber-text-glow mb-2">
+                MINI-GAME HUB
+              </h2>
+              <div className="border-b-2 border-cyber-border mb-4"></div>
+              <p className="text-gray-300 mb-6">
+                Quick training exercises to sharpen specific skills in software engineering and product management.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                <div className="cyber-badge bg-cyber-accent/20 text-cyber-accent text-xs">
+                  Puzzle Challenges
+                </div>
+                <div className="cyber-badge bg-cyber-accent/20 text-cyber-accent text-xs">
+                  Quick Debug
+                </div>
+                <div className="cyber-badge bg-cyber-accent/20 text-cyber-accent text-xs">
+                  Test Cases
+                </div>
+                <div className="cyber-badge bg-cyber-accent/20 text-cyber-accent text-xs">
+                  Risk Identification
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-auto relative z-10">
+              <Link 
+                to="/mini-games"
+                className="cyber-button-accent text-center py-2 w-full"
+              >
+                BROWSE MINI-GAMES
+              </Link>
+            </div>
+          </div>
+          
+          {/* Leaderboard and Profile Section */}
+          <div className="cyber-container p-6 border-cyber-muted h-full flex flex-col relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 -mt-4 -mr-4 opacity-10">
+              <Database size={80} className="text-gray-500" />
+            </div>
+            
+            <div className="mb-6 relative z-10">
+              <h2 className="text-xl font-bold text-cyber-terminal-blue cyber-text-glow mb-2">
+                AGENT HEADQUARTERS
+              </h2>
+              <div className="border-b-2 border-cyber-border mb-4"></div>
+              <p className="text-gray-300 mb-6">
+                Track your progress, view earned badges, and compare your ranking with other agents.
+              </p>
+            </div>
+            
+            <div className="mt-auto grid grid-cols-2 gap-4 relative z-10">
+              <Link 
+                to="/profile"
+                className="cyber-button text-center py-2"
+              >
+                AGENT PROFILE
+              </Link>
+              <Link 
+                to="/leaderboard"
+                className="cyber-button text-center py-2"
+              >
+                LEADERBOARD
+              </Link>
+            </div>
+          </div>
         </div>
         
         <div className="mt-8 text-center">
