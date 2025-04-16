@@ -61,7 +61,22 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+                // Cyber theme colors
+                cyber: {
+                    background: '#0C0E13',
+                    foreground: '#E5F2FF',
+                    primary: '#8B5CF6',
+                    secondary: '#1EAEDB',
+                    accent: '#F97316',
+                    muted: '#1A1F2C',
+                    border: '#2A3347',
+                    'terminal-green': '#33FF55',
+                    'terminal-blue': '#33C3F0',
+                    'terminal-purple': '#8B5CF6',
+                    'terminal-red': '#ea384c',
+                    'terminal-yellow': '#F7C244',
+                }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
