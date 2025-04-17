@@ -1,9 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import GameHUD from '@/components/game/GameHUD';
+import { Link, useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 import { usePlayer } from '@/context/PlayerContext';
-import { toast } from 'sonner';
+import GameHUD from '@/components/game/GameHUD';
+import CodeBlock from '@/components/game/CodeBlock';
+import { reviewScenarios, reviewTechniques } from '../../data/reviewData';
 
 interface ReviewTechnique {
   id: string;
@@ -22,6 +23,8 @@ interface ReviewScenario {
 }
 
 const ReviewMatchupGame = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const { player, updatePlayerXP, completeGame, unlockBadge } = usePlayer();
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [score, setScore] = useState(0);
@@ -31,7 +34,7 @@ const ReviewMatchupGame = () => {
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [selectedTechnique, setSelectedTechnique] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [feedbackType, setFeedbackType] = useState<'success' | 'error'>('success');
+  const [feedbackType, setFeedbackType] = useState<'success' | 'error' | 'partial'>('success');
   const [gameCompleted, setGameCompleted] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState({
@@ -148,7 +151,11 @@ const ReviewMatchupGame = () => {
       setScore(newScore);
       setCurrentXp(Math.min(currentXp + 5, 100));
       
-      toast.success(`Correct! ${reviewTechniques.find(t => t.id === techniqueId)?.name} is the right choice.`);
+      toast({
+        title: "Game Completed!",
+        description: "You've earned 50 XP and a new badge!",
+        variant: "default"
+      });
       setShowFeedback(true);
       
       // Move to next scenario after delay
@@ -159,20 +166,7 @@ const ReviewMatchupGame = () => {
           setShowFeedback(false);
         } else {
           // Game completed!
-          setGameCompleted(true);
-          completeGame('code-review-challenge', newScore, 300 - timeLeft);
-          
-          // Unlock badge if score is high enough
-          if (newScore >= 40) {
-            unlockBadge('review-expert');
-          }
-          
-          setModalContent({
-            title: 'Review Challenge Complete!',
-            message: `Congratulations! You've successfully matched all review techniques with a score of ${newScore} points.`,
-            type: 'success'
-          });
-          setShowModal(true);
+          handleGameCompleted(newScore);
         }
       }, 2000);
     } else {
@@ -180,18 +174,63 @@ const ReviewMatchupGame = () => {
       setFeedbackType('error');
       const newLives = lives - 1;
       setLives(newLives);
-      toast.error(`Incorrect. ${reviewTechniques.find(t => t.id === techniqueId)?.name} is not the best choice here.`);
+      toast({
+        title: "Incorrect Match",
+        description: "Try again!",
+        variant: "destructive"
+      });
       setShowFeedback(true);
       
-      if (newLives <= 0) {
-        setModalContent({
-          title: 'Game Over',
-          message: 'You\'ve run out of lives. Would you like to try again?',
-          type: 'error'
-        });
-        setShowModal(true);
-      }
+      // Move to next scenario after delay if not game over
+      setTimeout(() => {
+        if (newLives > 0) {
+          if (scenarioIndex < reviewScenarios.length - 1) {
+            setScenarioIndex(scenarioIndex + 1);
+            setSelectedTechnique(null);
+            setShowFeedback(false);
+          } else {
+            // Game completed with some wrong answers
+            handleGameCompleted(score);
+          }
+        } else {
+          // Game over
+          setModalContent({
+            title: 'Game Over',
+            message: 'You\'ve run out of lives. Would you like to try again?',
+            type: 'error'
+          });
+          setShowModal(true);
+        }
+      }, 2000);
     }
+  };
+
+  const handleGameCompleted = (finalScore: number) => {
+    setGameCompleted(true);
+    
+    // Award XP to player
+    updatePlayerXP(currentXp);
+    
+    // Mark game as completed
+    completeGame('code-review-challenge', finalScore, 300 - timeLeft);
+    
+    // Award badge if score is high enough
+    if (finalScore >= 40) {
+      unlockBadge('review-expert');
+      
+      toast({
+        title: "Badge Unlocked!",
+        description: "You've earned the Review Expert badge!",
+        variant: "default"
+      });
+    }
+    
+    setModalContent({
+      title: 'Review Challenge Complete!',
+      message: `Congratulations! You've successfully matched all review techniques with a score of ${finalScore} points.`,
+      type: 'success'
+    });
+    setShowModal(true);
   };
 
   const restartGame = () => {
@@ -331,12 +370,22 @@ const ReviewMatchupGame = () => {
             </h2>
             <p className="text-gray-300 mb-6">{modalContent.message}</p>
             <div className="flex space-x-4">
-              <button 
-                onClick={restartGame}
-                className="cyber-button-primary flex-1"
-              >
-                Try Again
-              </button>
+              {modalContent.type === 'error' && (
+                <button 
+                  onClick={restartGame}
+                  className="cyber-button-primary flex-1"
+                >
+                  Try Again
+                </button>
+              )}
+              {modalContent.type === 'success' && (
+                <button 
+                  onClick={() => navigate('/campaign')}
+                  className="cyber-button-primary flex-1"
+                >
+                  Return to Campaign
+                </button>
+              )}
               <Link 
                 to="/campaign"
                 className="cyber-button flex-1 text-center"

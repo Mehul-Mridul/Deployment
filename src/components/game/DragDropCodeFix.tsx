@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import CodeBlock from './CodeBlock';
 
@@ -8,18 +7,30 @@ interface DragDropCodeFixProps {
   correctFixIndex: number;
   onCorrectFix: () => void;
   onIncorrectFix: () => void;
+  isLevelTransitioning?: boolean;
 }
 
 const DragDropCodeFix: React.FC<DragDropCodeFixProps> = ({
   fixes,
   correctFixIndex,
   onCorrectFix,
-  onIncorrectFix
+  onIncorrectFix,
+  isLevelTransitioning = false
 }) => {
   const [selectedFix, setSelectedFix] = useState<number | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [feedbackType, setFeedbackType] = useState<'success' | 'error' | ''>('');
   const [isCorrect, setIsCorrect] = useState(false);
+
+  // Reset state only when fixes change AND we're not transitioning
+  useEffect(() => {
+    if (!isLevelTransitioning) {
+      setSelectedFix(null);
+      setFeedbackMessage('');
+      setFeedbackType('');
+      setIsCorrect(false);
+    }
+  }, [fixes, isLevelTransitioning]);
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -75,7 +86,7 @@ const DragDropCodeFix: React.FC<DragDropCodeFixProps> = ({
                     key={`fix-${index}`}
                     draggableId={`fix-${index}`}
                     index={index}
-                    isDragDisabled={selectedFix !== null}
+                    isDragDisabled={selectedFix !== null || isLevelTransitioning}
                   >
                     {(provided) => (
                       <div
@@ -125,7 +136,7 @@ const DragDropCodeFix: React.FC<DragDropCodeFixProps> = ({
                     }`}>
                       {feedbackMessage}
                     </div>
-                    {!isCorrect && (
+                    {!isCorrect && !isLevelTransitioning && (
                       <button 
                         onClick={resetSelection}
                         className="cyber-button-accent mt-4 text-sm py-1 px-4"

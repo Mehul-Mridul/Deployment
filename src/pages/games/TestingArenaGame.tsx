@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import GameHUD from '@/components/game/GameHUD';
@@ -292,6 +291,26 @@ const TestingArenaGame = () => {
       setLives(newLives);
       toast.error(`Incorrect. ${testingStrategies.find(s => s.id === strategyId)?.name} is not the best strategy for this scenario.`);
       setShowFeedback(true);
+      
+      // Move to next scenario after delay, even if wrong
+      setTimeout(() => {
+        if (scenarioIndex < testingScenarios.length - 1) {
+          setScenarioIndex(scenarioIndex + 1);
+          setSelectedStrategy(null);
+          setShowFeedback(false);
+        } else {
+          // Game completed!
+          setGameCompleted(true);
+          completeGame('testing-arena', score, 300 - timeLeft);
+          
+          setModalContent({
+            title: 'Testing Arena Complete!',
+            message: `You've completed all testing scenarios with a score of ${score} points.`,
+            type: 'success'
+          });
+          setShowModal(true);
+        }
+      }, 2000);
       
       if (newLives <= 0) {
         setModalContent({

@@ -1,4 +1,3 @@
-
 // Player information
 export interface Player {
   id: string;
@@ -8,6 +7,14 @@ export interface Player {
   maxXp: number;
   badges: Badge[];
   completedGames: string[];
+  gameProgress: Record<string, GameProgress>;
+  stats: {
+    totalScore: number;
+    gamesPlayed: number;
+    averageScore: number;
+    totalTimePlayed: number;
+    perfectGames: number;
+  };
 }
 
 // Badge definitions
@@ -17,6 +24,11 @@ export interface Badge {
   description: string;
   iconName: string;
   unlocked: boolean;
+  requirements: {
+    type: 'score' | 'completion' | 'time' | 'combo';
+    value: number;
+    gameId?: string;
+  };
 }
 
 // Game categories
@@ -48,6 +60,15 @@ export interface Game {
   xpReward: number;
   timeLimit?: number; // in seconds
   isCompleted?: boolean;
+  achievements: {
+    id: string;
+    name: string;
+    description: string;
+    requirements: {
+      type: 'score' | 'completion' | 'time' | 'combo';
+      value: number;
+    };
+  }[];
 }
 
 // Game question
@@ -66,4 +87,8 @@ export interface GameProgress {
   completed: boolean;
   attemptsUsed: number;
   timeSpent?: number; // in seconds
+  bestScore?: number;
+  fastestTime?: number;
+  lastPlayed?: string; // ISO date string
+  achievements?: string[]; // List of achievement IDs earned in this game
 }

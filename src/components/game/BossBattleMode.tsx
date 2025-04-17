@@ -1,26 +1,17 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { managementGames } from '@/data/gameData';
 import GameCard from './GameCard';
 import GameHUD from './GameHUD';
+import { usePlayer } from '@/context/PlayerContext';
 
 const BossBattleMode: React.FC = () => {
-  const [playerStats] = useState({
-    level: 1,
-    xp: 0,
-    maxXp: 100,
-    lives: 3,
-    score: 0
-  });
-  
-  // Mock completed games (would normally come from player progress)
-  const completedGames: string[] = [];
+  const { player } = usePlayer();
   
   // Enhanced games with completion status
   const gamesWithStatus = managementGames.map(game => ({
     ...game,
-    completed: completedGames.includes(game.id)
+    completed: player.completedGames.includes(game.id)
   }));
 
   return (
@@ -29,12 +20,12 @@ const BossBattleMode: React.FC = () => {
       <GameHUD 
         topic="Product Management"
         time={0}
-        score={playerStats.score}
-        lives={playerStats.lives}
-        level={playerStats.level}
+        score={0}
+        lives={3}
+        level={player.level}
         attempts={0}
-        xp={playerStats.xp}
-        maxXp={playerStats.maxXp}
+        xp={player.xp}
+        maxXp={player.maxXp}
       />
       
       <div className="max-w-6xl mx-auto p-6">
@@ -62,10 +53,10 @@ const BossBattleMode: React.FC = () => {
           </p>
           <div className="flex space-x-2">
             <div className="cyber-badge bg-cyber-secondary/20 text-cyber-secondary">
-              {playerStats.xp} XP EARNED
+              {player.xp} XP EARNED
             </div>
             <div className="cyber-badge bg-cyber-muted text-white">
-              {completedGames.length}/{managementGames.length} BOSSES DEFEATED
+              {gamesWithStatus.filter(game => game.completed).length}/{managementGames.length} BOSSES DEFEATED
             </div>
           </div>
         </div>
@@ -106,11 +97,11 @@ const BossBattleMode: React.FC = () => {
             
             <button 
               className={`cyber-button-accent ${
-                completedGames.length < managementGames.length ? 'opacity-50 cursor-not-allowed' : ''
+                gamesWithStatus.filter(game => game.completed).length < managementGames.length ? 'opacity-50 cursor-not-allowed' : ''
               }`}
-              disabled={completedGames.length < managementGames.length}
+              disabled={gamesWithStatus.filter(game => game.completed).length < managementGames.length}
             >
-              {completedGames.length < managementGames.length ? 'LOCKED' : 'FACE MEGA BOSS'}
+              {gamesWithStatus.filter(game => game.completed).length < managementGames.length ? 'LOCKED' : 'FACE MEGA BOSS'}
             </button>
           </div>
         </div>
